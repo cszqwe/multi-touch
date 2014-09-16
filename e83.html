@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<title>Shared Things</title>
+
+		<title>Shared Things</title>
+
+		<!-- <link href="jquery-ui-1.10.4.custom/css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet"> ignore jquery ui styles, eventually we will use bootstrap styles -->
+
+                <script src="bootstrap/js/jquery.min.js"></script> <!-- version of jquery for bootstrap -->
+                <script src="jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.js"></script> <!-- enough of jquery ui for dragging, no more -->
+                <script src="jquery.ui.touch-punch/jquery.ui.touch-punch.min.js"></script> <!-- http://touchpunch.furf.com/ -->
+		<style>
+			.draggable { position: fixed; } 
+		</style>
+		<script src="config.js" ></script>
+		<script>
+			var socket;
+			var worldName="";
+			var worldNameList={};
+			var screenHeight=0;
+			var screenWidth=0;
+			function send(object){
+				socket.send(JSON.stringify(object));
+			}
+			function logDrag(event, ui){
+				var elementPosition={};
+				var heightRatio=(ui.position.top/screenHeight);
+				var widthRatio=(ui.position.left/screenWidth);
+				elementPosition['operation']="drag";
+				elementPosition['id']=event.target.id;
+				elementPosition['name']=worldName;
+				elementPosition[event.target.id]={'x':widthRatio,'y':heightRatio};
+				send(elementPosition);
+			}
+			function lock(){
+				var elementLock={};
+				elementLock['operation']="lock";
+				elementLock['id']=event.target.id;
+				elementLock['name']=worldName;
+				elementLock['lock']=event.target.id;
+				send(elementLock);
+			}
+			function unlock(){
+				var elementUnlock={};
+				elementUnlock['operation']="unlock";
+				elementUnlock['id']=event.target.id;
+				elementUnlock['name']=worldName;
+				elementUnlock['unlock']=event.target.id;
+				send(elementUnlock);
+			}
+			function processMessage(messageObject){
+				var id=messageObject['id'];
+				//updates the world when it is opened for the first time
+				if(messageObject['operation']=="changeWorld"&&messageObject['name']==worldName){
+					$("#x1").css({'top': screenHeight*messageObject['x1']['y'], 'left': screenWidth*messageObject['x1']['x']});
+					$("#x2").css({'top': screenHeight*messageObject['x2']['y'], 'left': screenWidth*messageObject['x2']['x']});
+					$("#x3").css({'top': screenHeight*messageObject['x3']['y'], 'left': screenWidth*messageObject['x3']['x']});
+					$("#x4").css({'top': screenHeight*messageObject['x4']['y'], 'left': screenWidth*messageObject['x4']['x']});
+					$("#x5").css({'top': screenHeight*messageObject['x5']['y'], 'left': screenWidth*messageObject['x5']['x']});
+					$("#o1").css({'top': screenHeight*messageObject['o1']['y'], 'left': screenWidth*messageObject['o1']['x']});
+					$("#o2").css({'top': screenHeight*messageObject['o2']['y'], 'left': screenWidth*messageObject['o2']['x']});
+					$("#o3").css({'top': screenHeight*messageObject['o3']['y'], 'left': screenWidth*messageObject['o3']['x']});
+					$("#o4").css({'top': screenHeight*messageObject['o4']['y'], 'left': screenWidth*messageObject['o4']['x']});
+					$("#o5").css({'top': screenHeight*messageObject['o5']['y'], 'left': screenWidth*messageObject['o5']['x']});
+					$("#tttboard").css({'top': screenHeight*messageObject['tttboard']['y'], 'left': screenWidth*messageObject['tttboard']['x']});
+				}//only update the elements in the world that is not being dragged
+				else if (messageObject['operation']=="drag"&&messageObject['name']==worldName&&!$('#'+id).is('.ui-draggable-dragging')){
+					var idHeight=screenHeight*messageObject[id]['y'];
+					var idWidth=screenWidth*messageObject[id]['x'];
+					$('#'+id).css({'top': idHeight, 'left': idWidth});
+				}//lock elements
+				else if (messageObject['operation']=="lock"&&messageObject['name']==worldName){
+					var elementIdToLock = messageObject["lock"];
+					if (!$('#'+elementIdToLock).is('.ui-draggable-dragging'))
+						$('#'+elementIdToLock).draggable('disable');
+				}//unlock elements
+				else if (messageObject['operation']=="unlock"&&messageObject['name']==worldName){
+					var elementIdToUnlock = messageObject["unlock"];
+					$('#'+elementIdToUnlock).draggable('enable');
+				}//updates every server whenever a new world is created
+				else if(messageObject['operation']=="newWorld"){
+					if(messageObject['status']=="success"){
+						var world=messageObject['world'];
+						worldNameList={};
+						$('#selectWorld').html("");
+						$.each(world, function(key,val) {
+							worldNameList[key]={};
+							$('#selectWorld').append("<option value="+decodeURI(key)+">"+decodeURI(key)+"</option>");
+						});
+						//shows a notice
+						$('#newWorldNoticeCreated').slideDown(300).delay(800).slideUp(300);
+					}
+				}//fetch the new world for a new browser
+				else if(messageObject['operation']=="getWorld"){
+					var world=messageObject['world'];
+					worldNameList={};
+					$('#selectWorld').html("");
+					$.each(world, function(key,val) {
+						worldNameList[key]={};
+						$('#selectWorld').append("<option value="+decodeURI(key)+">"+decodeURI(key)+"</option>");
+					});
+				}
+			}
+			function getWorld(){
+				var getWorld={};
+				getWorld['operation']="getWorld";
+				send(getWorld);
+			}
+			function createWorld(){
+				if(worldNameList.hasOwnProperty($('#newWorldText').val())){
+					$('#newWorldNoticeExisted').slideDown(300).delay(800).slideUp(300);
+				}else{
+					var newWorld={};
+					newWorld['operation']="newWorld";
+					newWorld['name']=encodeURI($('#newWorldText').val());
+					send(newWorld);
+				}
+			}
+			function changeWorld(){
+				var changeWorld={};
+				changeWorld['operation']="changeWorld";
+				changeWorld['name']=$('#selectWorld').val();
+				send(changeWorld);
+				worldName=$('#selectWorld').val();
+				$('#world').show();
+			}
+			$(function() {
+				screenHeight=screen.height;
+				screenWidth=screen.width;
+				//nodejs
+				socket = new WebSocket("ws://localhost:"+port);
+
+				socket.onopen = function (event) {
+					getWorld();
+					$('#ui').show();
+					console.log("connected");
+				};
+				socket.onclose = function (event) {
+					alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
+				};
+				socket.onmessage = function (event) {
+					console.log(event.data);
+					processMessage(JSON.parse(event.data));
+				}
+				$('#ui').hide();
+				$('#world').hide();
+				$('#newWorldNoticeCreated').hide();
+				$('#newWorldNoticeExisted').hide();
+				$("#world img").draggable();				
+				$("#world img").on("drag"     , 
+					function(event, ui){
+						logDrag(event, ui);
+					});
+				//lock all other client's element's draggables
+				$("#world img").on("dragstart", 
+					function(event, ui){
+						lock(event, ui); 
+					});
+				//unlock all client's element's draggables
+				$("#world img").on("dragstop" , 
+					function(event, ui){
+						unlock(event, ui); 
+				});
+				//$("#world img").on("drag"     , function(event, ui) { logDrag(event, ui); });
+			});
+		</script>
+	</head>
+	<body>
+		<div id="ui">
+			<table>
+			<tr>
+				<td><h3>New World</h3></td>
+				<td><h3>Select World</h3></td>
+			</tr>
+			<tr>
+				<td>
+				<form name="input" id="newWorld">
+					<input type="text" id="newWorldText">
+					<button type="button" onClick="createWorld()">Create</button>
+				</form>
+				</td>
+				<td>
+				<form>
+					<select id="selectWorld"></select>
+					<button type="button" onClick="changeWorld()">Select</button>
+				</form>
+				</td>
+				<td>
+					<span id="newWorldNoticeCreated">New world has been created.</span>
+					<span id="newWorldNoticeExisted">World name has been taken.</span>
+				</td>
+			</tr>
+			</table>
+		</div>
+		<div id="world">
+			<img id="x1" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x2" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x3" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x4" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x5" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="o1" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o2" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o3" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o4" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o5" src="images/o.gif" style="z-index:2;" /class="draggable" >
+			<img id="tttboard" src="images/tictactoe.gif" style="z-index:1;" class="draggable" />
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,4 @@
+1. Only send the position information to the server. The state of world would not be stored in the client anymore.
+2. Set the lock/unlock function in e8
+3. Fixed the position problem in e8. Use x,y the represent the position inside the div.
+4. Fixed some problems in e6 such like if you create a new page, you won't receive the newset states.
