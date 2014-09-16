@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+		<meta charset="utf-8">
+		<title>e2</title>
+
+		<!-- <link href="jquery-ui-1.10.4.custom/css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet"> ignore jquery ui styles, eventually we will use bootstrap styles -->
+
+                <script src="bootstrap/js/jquery.min.js"></script> <!-- version of jquery for bootstrap -->
+                <script src="jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.js"></script> <!-- enough of jquery ui for dragging, no more -->
+                <script src="jquery.ui.touch-punch/jquery.ui.touch-punch.min.js"></script> <!-- http://touchpunch.furf.com/ -->		
+		
+		<style>
+			.draggable { position: absolute; } 
+		</style>
+
+		<script src="config.js" ></script>
+		<script>
+			var socket;
+			var world_id;
+			var moving;
+
+			function logDrag(event, ui){
+				if (world_id == null)
+					return;
+				socket.send(JSON.stringify({"type": "update_position",
+											"world_id": world_id,
+											"img_id": event.target.id,
+										    "position": {
+										    	"x": ui.position.top - $("#world").offset().top,
+										    	"y": ui.position.left - $("#world").offset().left
+										    }}));
+			}
+			function lockDrag(event, ui) {
+				if (world_id == null)
+					return;
+				moving = event.target.id;
+				socket.send(JSON.stringify({
+					"type": "lock",
+					"world_id": world_id,
+					"img_id": event.target.id
+				}));
+			}
+			function unlockDrag(event, ui) {
+				if (world_id == null)
+					return;
+				socket.send(JSON.stringify({
+					"type": "unlock",
+					"world_id": world_id,
+					"img_id": event.target.id
+				}));
+			}
+			$(function() { 
+				socket = new WebSocket("ws://localhost:"+port);
+
+				socket.onmessage = function(event) {
+					var data = JSON.parse(event.data);
+					if (data.type == "update_position") {
+						$("#"+data.img_id).css("top", $("#world").offset().top + data.position.x);
+						$("#"+data.img_id).css("left", $("#world").offset().left + data.position.y);
+					} else if (data.type == "create_world") {
+						var recent_created = encodeURI($("#new_world").val());
+						if (recent_created != "")
+							$("#world_list").append("<option value=" + data.name + " selected>" + data.name + "</option>");
+						else
+							$("#world_list").append("<option value=" + data.name + ">" + data.name + "</option>");
+						$("#world_list").change();
+						$("#new_world").val("");
+					} else if (data.type == "delete_world") {
+						$("#world_list").children().each(function (index, self){
+							if (self.value == data.name)
+								self.remove();
+						});
+						$("#world_list").change();
+					} else if (data.type == "create_worlds") {
+						var world_list = $("#world_list");
+						for (i=0,l=data.names.length;i<l;i++)
+							world_list.append("<option value=" + data.names[i] + ">" + data.names[i] + "</option>");
+						$("#world_list").change();
+					} else if (data.type == "update_positions") {
+						for (i in data.positions) {
+							$("#"+i).css("top", $("#world").offset().top+data.positions[i].x);
+							$("#"+i).css("left", $("#world").offset().left+data.positions[i].y);
+							if (data.positions[i].moving)
+								$("#"+i).draggable('disable');
+							else
+								$("#"+i).draggable('enable');
+						}
+					} else if (data.type == "lock") {
+						if (data.img_id != moving)
+							$("#"+data.img_id).draggable("disable");
+					} else if (data.type == "unlock") {
+						$("#"+data.img_id).draggable("enable");
+					}
+				}
+
+				$("#world img").draggable(); 
+				$("#world img").on("dragstart", function(event, ui) { lockDrag(event, ui); });
+				$("#world img").on("dragstop" , function(event, ui) { unlockDrag(event, ui); });
+				$("#world img").on("drag"     , function(event, ui) { logDrag(event, ui); });
+				$("#world_list").change(function() {
+					if ($("#world_list").val() == null) {
+						world_id = null;
+					} else {
+						socket.send(JSON.stringify({
+							"type": "change_world",
+							"name": encodeURI($("#world_list").val())
+						}));
+						world_id = encodeURI($("#world_list").val());
+					}
+				});
+			});
+			function create_world() {
+				socket.send(JSON.stringify({
+					"type": "create_world",
+					"name": encodeURI($("#new_world").val())
+				}));
+			};
+			function delete_world() {
+				socket.send(JSON.stringify({
+					"type": "delete_world",
+					"name": encodeURI($("#world_list").val())
+				}));
+			}
+		</script>
+		</head>
+		<body>
+		xxxxxxxxxxxxxxx<p>xxxxxxxxxxxxxxxxxxx<p>xxxxxxxxxxxxxxx
+		<div id="world" style="border-width:2px;border-style:solid; width:550px; height:500px; margin:0 auto; ">
+			<img id="x1" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x2" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x3" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x4" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="x5" src="images/x.gif" style="z-index:2;" class="draggable" />
+			<img id="o1" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o2" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o3" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o4" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="o5" src="images/o.gif" style="z-index:2;" class="draggable" />
+			<img id="tttboard" src="images/tictactoe.gif" style="z-index:1;" />
+		</div>
+		<select id="world_list">
+		</select>
+		<button onClick="delete_world();">Delete world</button>
+		<input id="new_world" type="text" />
+		<button onClick="create_world();">Create new world</button>
+	</body>
+</html>

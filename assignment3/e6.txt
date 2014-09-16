@@ -1,0 +1,5 @@
+1. The message which we send is to large. Every time, we would send the whole message about the  world though we just changed the position of only one single component.
+
+2. On the clients(not the server), we just changed the position instead of the world variable. It  is a wrong implemention. Especially when we create a new client, it can leads to some very  obverious bug.
+
+3. Have not locked the component when one is moving it. It is very dangerous to do so.
