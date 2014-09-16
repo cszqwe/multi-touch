@@ -31,37 +31,106 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+        <p>&lt;!doctype html&gt;
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+    </p>
+        <pre><code>    &lt;title&gt;Shared Things&lt;/title&gt;
+    &lt;!-- JQuery etc... --&gt;
+        &lt;!-- &lt;link href="jquery-ui-1.10.4.custom/css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet"&gt; ignore jquery ui styles in favour of bootstrap --&gt; 
+    &lt;script src="bootstrap/js/jquery.min.js"&gt;&lt;/script&gt; 
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+        &lt;script src="jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.js"&gt;&lt;/script&gt; &lt;!-- enough jquery ui for dragging  --&gt;
+    &lt;script src="jquery.ui.touch-punch/jquery.ui.touch-punch.min.js"&gt;&lt;/script&gt; &lt;!-- http://touchpunch.furf.com/ so jquery dragging is touch enabled --&gt;
+
+    &lt;!-- Bootstrap --&gt;
+    &lt;link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;!-- Include all compiled plugins (below), or include individual files as needed --&gt;
+
+    &lt;style&gt;
+        .draggable { position: fixed; } 
+    &lt;/style&gt;
+    &lt;script&gt;
+        function logDrag(event, ui){
+            console.log(JSON.stringify(ui.position) + " " + event.target.id); 
+        }
+        $(function() { 
+            $("#world img").draggable(); 
+            $("#world img").on("dragstart", function(event, ui) { logDrag(event, ui); });
+            $("#world img").on("dragstop" , function(event, ui) { logDrag(event, ui); });
+            $("#world img").on("drag"     , function(event, ui) { logDrag(event, ui); });
+        });
+    &lt;/script&gt;
+&lt;/head&gt;
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p></p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<p> </p><div>
+    &lt;!-- Brand and toggle get grouped for better mobile display --&gt;
+    <div>
+      
+        Toggle navigation
+        
+        
+        
+      
+      <a href="#">Brand</a>
+    </div>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<pre><code>&lt;!-- Collect the nav links, forms, and other content for toggling --&gt;
+&lt;div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"&gt;
+  &lt;ul class="nav navbar-nav"&gt;
+    &lt;li class="active"&gt;&lt;a href="#"&gt;Link&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Link&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="dropdown"&gt;
+      &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;Dropdown &lt;b class="caret"&gt;&lt;/b&gt;&lt;/a&gt;
+      &lt;ul class="dropdown-menu"&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Action&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Another action&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+        &lt;li class="divider"&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+        &lt;li class="divider"&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;One more separated link&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;form class="navbar-form navbar-left"&gt;
+    &lt;div class="form-group"&gt;
+      &lt;input type="text" class="form-control" placeholder="Search"&gt;
+    &lt;/div&gt;
+    &lt;button type="submit" class="btn btn-default"&gt;Submit&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;ul class="nav navbar-nav navbar-right"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Link&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="dropdown"&gt;
+      &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown"&gt;Dropdown &lt;b class="caret"&gt;&lt;/b&gt;&lt;/a&gt;
+      &lt;ul class="dropdown-menu"&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Action&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Another action&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+        &lt;li class="divider"&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;
+</code></pre>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p></p>
+</div>&lt;!-- /.container-fluid --&gt;
+ <div>
+        <div>
+            <div>
+                <div>
+                    <img src="images/x.gif"><img src="images/x.gif"><img src="images/x.gif"><img src="images/x.gif"><img src="images/x.gif"><img src="images/o.gif"><img src="images/o.gif"><img src="images/o.gif"><img src="images/o.gif"><img src="images/o.gif"><img src="images/tictactoe.gif">
+</div>
+            </div>
+        </div>
+    </div>
+        &lt;!-- Bootstrap --&gt;
       </section>
     </div>
 
